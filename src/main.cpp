@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "CameraManager.h"
+#include "ObjectDetector.h"
 
 using namespace std;
 
@@ -12,23 +13,21 @@ int main(int arg, char** argu) {
 		return 1;
 	}
 
-	cv::CascadeClassifier face_cascade;
-	if(!face_cascade.load("../assets/haarcascade_frontalface_default.xml")){
+	ObjectDetector detector;
+	if(!detector.loadModel("../assets/haarcascade_frontalface_default.xml")){
 		cerr<<"Error"<<endl;
 		return 1;
 	}
 
-	cv::Mat frame, gray;
+	cv::Mat frame;
 	while(true){
 		frame = cam.getFrame();
 		if(frame.empty()) break;
 
-		cv::cvtColor(frame,gray,cv::COLOR_BGR2GRAY);
-		vector<cv::Rect>faces;
-		face_cascade.detectMultiScale(gray, faces);
+		auto objects = detector.detect(frame);
 
-		for(const auto& face : faces){
-			cv::rectangle(frame, face,cv::Scalar(0,255,0),2);
+		for(const auto& object : objects){
+			cv::rectangle(frame, object, cv::Scalar(0, 255, 0), 2);
 		}
 
 		cv::imshow("SmartVision - Object Detection", frame);
