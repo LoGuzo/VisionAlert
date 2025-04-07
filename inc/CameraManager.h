@@ -1,5 +1,5 @@
-#ifndef _CAMERAMANGER_H
-#define _CAMERAMANGER_H
+#ifndef CAMERAMANGER_H
+#define CAMERAMANGER_H
 #include <opencv2/opencv.hpp>
 
 class CameraManager{
