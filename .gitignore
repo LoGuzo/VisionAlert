@@ -3,6 +3,7 @@
 *.jpg
 *.dll
 *.lib
+*.xml
 
 CMakeCache.txt
 cmake_install.cmake
