@@ -1,37 +1,55 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 # 프로젝트명 자동 설정
 get_filename_component(ProjectId ${CMAKE_CURRENT_LIST_DIR} NAME)
 string(REPLACE " " "_" ProjectId ${ProjectId})
-project(${ProjectId} C CXX)
+project(${ProjectId} VERSION 0.1 LANGUAGES CXX)
 
-# C++11 사용
-set(CMAKE_CXX_STANDARD 11)
+# C++17 사용
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ✅ OpenCV 수동 경로 설정 (MinGW용 빌드 기준)
-set(OpenCV_DIR "C:/opencv/mingw_build")
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-# include, lib, dll 경로 지정
-set(OpenCV_INCLUDE_DIR "${OpenCV_DIR}/include")
-set(OpenCV_LIB "${OpenCV_DIR}/x64/mingw/lib/libopencv_world4100.dll.a")
-set(OpenCV_DLL "${OpenCV_DIR}/x64/mingw/bin/libopencv_world4100.dll")
-
-# include 디렉토리 등록
-include_directories(${OpenCV_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/inc)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
-# 소스 파일 가져오기
-file(GLOB SOURCES src/*.cpp)
+# OpenCV 경로 지정 (MinGW용 빌드 기준)
+set(OpenCV_DIR "C:/opencv/mingw_build")
+find_package(OpenCV REQUIRED)
+
+# Qt 경로 지정
+set(CMAKE_PREFIX_PATH "C:/Qt/6.8.3/mingw_64")
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+
+# 소스 파일
+file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE HEADERS inc/*.h)
 
 # 실행 파일 생성
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-# OpenCV 라이브러리 링크
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIB})
+# include 디렉토리 추가 (OpenCV + 프로젝트용 헤더)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${OpenCV_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/inc
+)
 
-# 빌드 후 DLL 복사
+# 라이브러리 링크
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
+        ${OpenCV_LIBS}
+)
+
+# OpenCV DLL 복사
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${OpenCV_DLL}"
+        "${OpenCV_DIR}/x64/mingw/bin/libopencv_world4100.dll"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )

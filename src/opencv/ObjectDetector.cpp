@@ -1,4 +1,4 @@
-#include "ObjectDetector.h"
+#include "onencv/ObjectDetector.h"
 
 bool ObjectDetector::loadModel(const string& path){
     return classifier.load(path);
