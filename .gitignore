@@ -12,3 +12,5 @@ Makefile
 
 .vscode/
 build/CMakeFiles/
+build/.qt/
+build/VisionAlert_autogen/
