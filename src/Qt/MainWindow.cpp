@@ -3,29 +3,26 @@
 #include <QVBoxLayout>
 #include <QImage>
 #include <QPixmap>
+#include "ui/ui_MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), timer(new QTimer(this)), videoLabel(new QLabel(this)) 
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , timer(new QTimer(this))
+    , videoLabel(new QLabel(this)) 
 {
+    ui->setupUi(this);
     setWindowTitle("VisionAlert - 얼굴 인식");
-    resize(800, 600);  // 메인 창 자체 크기 키우기
-
-    videoLabel = new QLabel(this);
-    videoLabel->setMinimumSize(640, 480);
-    videoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    QWidget *centralWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-    layout->addWidget(videoLabel);
-    setCentralWidget(centralWidget);
+    ui->sense_slider->setRange(1,10);
+    ui->sense_slider->setValue(5);
 
     if (!cam.open()) {
-        videoLabel->setText("카메라를 열 수 없습니다.");
+        ui->video_label->setText("카메라를 열 수 없습니다.");
         return;
     }
 
     if (!detector.loadModel("../assets/haarcascade_frontalface_default.xml")) {
-        videoLabel->setText("모델 로딩 실패.");
+        ui->video_label->setText("모델 로딩 실패.");
         return;
     }
 
@@ -48,5 +45,5 @@ void MainWindow::processFrame() {
 
     cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
     QImage img(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888);
-    videoLabel->setPixmap(QPixmap::fromImage(img).scaled(videoLabel->size(), Qt::KeepAspectRatio));
+    ui->video_label->setPixmap(QPixmap::fromImage(img).scaled(ui->video_label->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }

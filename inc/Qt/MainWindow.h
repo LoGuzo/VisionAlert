@@ -7,19 +7,22 @@
 #include "onencv/CameraManager.h"
 #include "onencv/ObjectDetector.h"
 
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
 class MainWindow : public QMainWindow{
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-    //virtual void forceVTable() {};
-
+    
 private slots:
     void processFrame();
 
 private:
+    Ui::MainWindow *ui;
     CameraManager   cam;
     ObjectDetector  detector;
     QTimer          *timer;
