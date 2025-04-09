@@ -16,6 +16,8 @@ set(CMAKE_AUTORCC ON)
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
 include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui)
 
 # OpenCV 경로 지정 (MinGW용 빌드 기준)
 set(OpenCV_DIR "C:/opencv/mingw_build")
@@ -28,14 +30,16 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 # 소스 파일
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS inc/*.h)
+file(GLOB_RECURSE UIS ui/*.ui)
 
 # 실행 파일 생성
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${UIS})
 
 # include 디렉토리 추가 (OpenCV + 프로젝트용 헤더)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${OpenCV_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/inc
+    ${PROJECT_SOURCE_DIR}/ui
 )
 
 # 라이브러리 링크
