@@ -4,8 +4,9 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QLabel>
-#include "onencv/CameraManager.h"
-#include "onencv/ObjectDetector.h"
+#include "opencv/CameraManager.h"
+#include "opencv/DetectionManager.h"
+#include "opencv/ObjectDetector.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,14 +20,15 @@ public:
     ~MainWindow();
     
 private slots:
-    void processFrame();
-
+    void                processFrame();
+    void                onSensitivitySliderChanged(int value);
+    void                logEvent(const QString& message, const cv::Rect& rect);
+    
 private:
-    Ui::MainWindow *ui;
-    CameraManager   cam;
-    ObjectDetector  detector;
-    QTimer          *timer;
-    QLabel          *videoLabel;
+    Ui::MainWindow      *ui;
+    CameraManager       cam;
+    DetectionManager    detectionManager;
+    QTimer              *timer;
 };
 
 #endif

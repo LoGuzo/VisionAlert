@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
-#include "onencv/CameraManager.h"
-
+#include "opencv/CameraManager.h"
 
 bool CameraManager::open(int cameraindex){
     cap.open(cameraindex);
