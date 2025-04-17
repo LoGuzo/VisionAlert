@@ -1,27 +1,29 @@
+// DetectionManager.h
 #ifndef DETECTIONMANAGER_H
 #define DETECTIONMANAGER_H
-#include <opencv2/opencv.hpp>
-#include <vector>
-#include "opencv/ObjectDetector.h"
+
+#include "MotionDetector.h"
+#include <chrono>
 
 class DetectionManager {
 public:
     DetectionManager();
 
 public:
-    std::vector<cv::Rect>   detectNewObjects(const cv::Mat& frame);
-    bool                    loadModel(const std::string& path);
-
-    void                    setSensetivity(const double& val);
-    double                  getSensetivity(){return detector.getSensetivity();}
+    std::vector<cv::Rect> detectAbnormalBehavior(const cv::Mat& frame);
+    void setThreshold(int t);
+    void setMinArea(int a);
 
 private:
-    bool                    isNewObject(const cv::Rect& rect);
+    MotionDetector motionDetector;
 
-private:
-    ObjectDetector          detector;
-    std::vector<cv::Rect>   prevRects;
-    double                  scaleFactor;
+    std::chrono::steady_clock::time_point lastMotionTime;
+    bool motionOngoing;
+
+    std::vector<std::pair<cv::Rect, std::chrono::steady_clock::time_point>> recentlyLogged;
+    int suppressSeconds = 5;
+
+    double computeIOU(const cv::Rect& a, const cv::Rect& b);
 };
 
-#endif
+#endif // DETECTIONMANAGER_H

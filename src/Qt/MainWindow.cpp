@@ -20,10 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
         return;
     }
 
-    if (!detectionManager.loadModel("../assets/haarcascade_frontalface_default.xml")) {
-        ui->video_label->setText("모델 로딩 실패.");
-        return;
-    }
     onSensitivitySliderChanged(ui->sense_slider->value());
     connect(ui->sense_slider, &QSlider::valueChanged, this, &MainWindow::onSensitivitySliderChanged);
     connect(timer, &QTimer::timeout, this, &MainWindow::processFrame);
@@ -39,10 +35,10 @@ void MainWindow::processFrame() {
     cv::Mat frame = cam.getFrame();
     if (frame.empty()) return;
 
-    auto faces = detectionManager.detectNewObjects(frame);
-    for (const auto& face : faces) {
-        cv::rectangle(frame, face, cv::Scalar(0, 255, 0), 2);
-        logEvent(QStringLiteral("새 객체 감지"), face);
+    auto abnormalRects = detectionManager.detectAbnormalBehavior(frame);
+    for (const auto& rect : abnormalRects) {
+        cv::rectangle(frame, rect, cv::Scalar(0, 0, 255), 2);
+        logEvent("이상행동 감지", rect);
     }
 
     cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
@@ -51,28 +47,31 @@ void MainWindow::processFrame() {
 }
 
 void MainWindow::onSensitivitySliderChanged(int value){
-    double scale = 1.01 + ((value - 1) / 9.0) * 0.49;
-    detectionManager.setSensetivity(scale);
-    
-    ui->sense_label->setText(QString::asprintf("감도 : %.2lf", detectionManager.getSensetivity()));
+    int threshold = 10 + (value - 1) * 5;
+    int minArea = 300 + (value - 1) * 150; // or 고정 값도 가능
+
+    detectionManager.setThreshold(threshold);
+    detectionManager.setMinArea(minArea);
+
+    ui->sense_label->setText(QString("감도 (T:%1, A:%2)").arg(threshold).arg(minArea));
 }
 
 void MainWindow::logEvent(const QString& message, const cv::Rect& rect) {
-    // QString timeStr = QTime::currentTime().toString(QStringLiteral("hh:mm:ss"));
+    QString timeStr = QTime::currentTime().toString("hh:mm:ss");
 
-    // QString infoStr = QStringLiteral("%1 (%2, %3, %4×%5)")
-    //                 .arg(message)
-    //                 .arg(rect.x)
-    //                 .arg(rect.y)
-    //                 .arg(rect.width)
-    //                 .arg(rect.height);
+    QString infoStr = QString("%1 (%2, %3, %4×%5)")
+                    .arg(message)
+                    .arg(rect.x)
+                    .arg(rect.y)
+                    .arg(rect.width)
+                    .arg(rect.height);
 
     int currentRow = ui->log_table->rowCount();
     int currentCol = ui->log_table->columnCount();
-    // // 시간 행
+    // 시간 행
     ui->log_table->insertColumn(currentCol);
-    ui->log_table->setItem(0, currentCol, new QTableWidgetItem("time"));
+    ui->log_table->setItem(0, currentCol, new QTableWidgetItem(timeStr));
 
-    // // 내용 행
-    ui->log_table->setItem(1, currentCol, new QTableWidgetItem("info"));
+    // 내용 행
+    ui->log_table->setItem(1, currentCol, new QTableWidgetItem(infoStr));
 }
